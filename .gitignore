@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+node_modules/
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+docs/superpowers/

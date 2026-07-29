@@ -1,0 +1,4 @@
+interface:
+  display_name: "Orchestrating Development Graphs"
+  short_description: "按风险选择流程，并用 Python/Node 可执行图和 SVG 预览约束复杂任务"
+  default_prompt: "Use $orchestrating-development-graphs to classify this development task and execute Complex work through a validated, previewed development graph."
