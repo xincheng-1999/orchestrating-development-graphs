@@ -1,20 +1,14 @@
-# Orchestrating Development Graphs
+# Graph Engineering for AI Development
 
 [简体中文](README.zh-CN.md)
 
-A Codex and Claude Code skill that selects the smallest reliable development workflow and uses a persistent executable graph only when a change is genuinely complex.
+> Turn complex AI-assisted development from static plans into executable, verifiable, resumable graphs.
 
-This is not a wrapper that sends every task through the same heavyweight pipeline:
+Orchestrating Development Graphs is a Codex and Claude Code Skill that applies **Graph Engineering** to complex development work: workflow decisions become machine-validated state transitions instead of prose that an Agent may silently skip.
 
-| Class | Typical signals | Route |
-| --- | --- | --- |
-| Simple | Local, mechanical, low risk, easy rollback | `Implement -> focused Verify` |
-| Standard | Bounded observable behavior change | `Spec -> Plan -> TDD batches -> Verify` |
-| Complex | Cross-module flow, persistence, migration, concurrency, permissions, security, build/dependency risk | Approved Spec/Plan plus an executable JSON graph |
+## From workflow diagram to executable state machine
 
-## What makes the Complex route executable
-
-The JSON graph is a persistent state machine, not a diagram-only artifact. It records:
+Graph Engineering means the JSON graph is the execution ledger, not a diagram-only artifact. It records:
 
 - ready, running, passed, failed, blocked, and skipped node states;
 - explicit pass, fail, blocked, and scope-change transitions;
@@ -32,6 +26,16 @@ flowchart LR
     A -->|scope change| E["Re-approval"]
     B -->|scope change| E
 ```
+
+## Use a graph only when complexity requires it
+
+Graph Engineering is the Complex route, not a tax on every change. The Skill first selects the smallest reliable workflow:
+
+| Class | Typical signals | Route |
+| --- | --- | --- |
+| Simple | Local, mechanical, low risk, easy rollback | `Implement -> focused Verify` |
+| Standard | Bounded observable behavior change | `Spec -> Plan -> TDD batches -> Verify` |
+| Complex | Cross-module flow, persistence, migration, concurrency, permissions, security, build/dependency risk | Approved Spec/Plan plus an executable JSON graph |
 
 ## Dependencies
 

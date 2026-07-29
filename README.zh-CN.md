@@ -1,20 +1,14 @@
-# 开发图编排 Skill
+# 面向 AI 开发的 Graph Engineering
 
 [English](README.md)
 
-这是一个同时适用于 Codex 和 Claude Code 的 Skill：先判断开发任务的复杂度，再选择足够可靠且不过度的工作流。只有真正复杂的改动才创建持久化、可执行的开发图。
+> 把复杂开发从静态计划升级为可验证、可恢复、可预览的执行图。
 
-它不会把所有任务都塞进同一套重流程：
+Orchestrating Development Graphs 是一个同时适用于 Codex 和 Claude Code 的 Skill。它把 **Graph Engineering** 引入复杂开发：流程决策不再只是可能被 Agent 跳过的文字，而是经过机器校验的状态迁移。
 
-| 分类 | 典型信号 | 路线 |
-| --- | --- | --- |
-| Simple | 局部、机械、低风险、容易回滚 | `Implement -> focused Verify` |
-| Standard | 范围明确的可观察行为变化 | `Spec -> Plan -> TDD batches -> Verify` |
-| Complex | 跨模块、持久化、迁移、并发、权限、安全、构建或依赖风险 | 已审批 Spec/Plan + 可执行 JSON Graph |
+## 从流程图到可执行状态机
 
-## Graph Engineering：从流程图到可执行状态机
-
-Complex 路线中的 JSON 不是用来展示的静态流程图，而是持久化状态机：
+Graph Engineering 的核心是：JSON Graph 不是用来展示的静态图，而是实际驱动任务的执行账本和持久化状态机：
 
 - 记录 `ready/running/passed/failed/blocked/skipped` 状态；
 - 只允许沿 `pass/fail/blocked/scope_change` 边迁移；
@@ -32,6 +26,16 @@ flowchart LR
     A -->|范围变化| E["重新审批"]
     B -->|范围变化| E
 ```
+
+## 只在复杂度需要时使用开发图
+
+Graph Engineering 只用于 Complex 路线，不会成为每次改动都要承担的流程税。Skill 会先选择足够可靠且不过度的最小工作流：
+
+| 分类 | 典型信号 | 路线 |
+| --- | --- | --- |
+| Simple | 局部、机械、低风险、容易回滚 | `Implement -> focused Verify` |
+| Standard | 范围明确的可观察行为变化 | `Spec -> Plan -> TDD batches -> Verify` |
+| Complex | 跨模块、持久化、迁移、并发、权限、安全、构建或依赖风险 | 已审批 Spec/Plan + 可执行 JSON Graph |
 
 ## 依赖关系
 
