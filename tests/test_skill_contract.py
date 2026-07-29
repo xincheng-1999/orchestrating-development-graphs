@@ -1,8 +1,64 @@
+import re
 import unittest
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def read_skill():
+    return (ROOT / "SKILL.md").read_text(encoding="utf-8")
+
+
+def frontmatter(skill):
+    match = re.match(r"^---\n(.*?)\n---\n", skill, flags=re.DOTALL)
+    if not match:
+        raise AssertionError("SKILL.md must start with YAML frontmatter")
+    return match.group(1)
+
+
+class PublishedSkillQualityContract(unittest.TestCase):
+    def test_frontmatter_exposes_distribution_metadata(self):
+        metadata = frontmatter(read_skill())
+        self.assertRegex(metadata, r"(?m)^license:\s*MIT$")
+        self.assertRegex(metadata, r"(?m)^compatibility:\s*.+$")
+        self.assertRegex(metadata, r"(?m)^allowed-tools:\s*Read Grep Glob$")
+        self.assertRegex(metadata, r'(?m)^\s+version:\s*["\']1\.0\.1["\']$')
+        self.assertIn("https://github.com/xincheng-1999/orchestrating-development-graphs", metadata)
+
+    def test_skill_has_machine_discoverable_usage_sections(self):
+        skill = read_skill()
+        for heading in (
+            "## When to Use",
+            "## When Not to Use",
+            "## Examples",
+            "## Limitations",
+            "## References",
+        ):
+            with self.subTest(heading=heading):
+                self.assertIn(heading, skill)
+
+    def test_examples_use_language_tagged_code_fences(self):
+        skill = read_skill()
+        self.assertIn("```text", skill)
+        self.assertIn("```powershell", skill)
+        fences = [line for line in skill.splitlines() if line.startswith("```")]
+        self.assertEqual(len(fences) % 2, 0, "code fences must be balanced")
+        for opening in fences[::2]:
+            self.assertRegex(opening, r"^```[a-zA-Z0-9_-]+$")
+
+    def test_references_name_schema_and_companion_skills(self):
+        skill = read_skill()
+        self.assertIn("<SKILL_ROOT>/references/graph-schema.md", skill)
+        for companion in (
+            "superpowers:brainstorming",
+            "superpowers:systematic-debugging",
+            "superpowers:test-driven-development",
+            "superpowers:verification-before-completion",
+            "bounded-plan-execution",
+        ):
+            with self.subTest(companion=companion):
+                self.assertIn(companion, skill)
 
 
 class ClaudeCodeCompatibilityContract(unittest.TestCase):

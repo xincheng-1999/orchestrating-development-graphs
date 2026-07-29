@@ -1,6 +1,12 @@
 ---
 name: orchestrating-development-graphs
 description: Use when starting a code change, feature, bug fix, refactor, or build/configuration task where workflow intensity, approval gates, or delegation may otherwise be disproportionate to the task.
+license: MIT
+compatibility: Codex and Claude Code; Python 3.10+ or Node.js 18+ is required only for Complex graph execution.
+allowed-tools: Read Grep Glob
+metadata:
+  version: "1.0.1"
+  repository: https://github.com/xincheng-1999/orchestrating-development-graphs
 ---
 
 # Orchestrating Development Graphs
@@ -10,6 +16,14 @@ description: Use when starting a code change, feature, bug fix, refactor, or bui
 Choose the smallest reliable workflow. Use a persistent executable graph only when concrete risks make conditional gates, failure routes, and resumable state necessary.
 
 User instructions and the nearest applicable host rule file—`AGENTS.md` in Codex or `CLAUDE.md` in Claude Code—override this Skill. Follow the host's normal rule-file discovery and precedence when both files are visible.
+
+## When to Use
+
+Use this Skill before every code change, feature, bug fix, refactor, build, dependency, or configuration task when the correct amount of process is not yet known. It is especially relevant when a task may involve approvals, public interfaces, persistence, migrations, concurrency, permissions, security, payments, resumable execution, or delegation.
+
+## When Not to Use
+
+Do not use this Skill for read-only explanation, status, review, research, or diagnosis that will not change code or configuration. Do not create a development graph merely because a task has several steps; only evidence-backed Complex work gets a persistent graph.
 
 ## Classify Before Acting
 
@@ -89,3 +103,42 @@ Every nontrivial graph node records inputs, owner, outputs, pass condition, and 
 On an ordinary failure, record `fail` first, follow the activated diagnostic or rework node, rerun the original gate, and preserve every attempt. On a material scope change, record `scope-change`, update Spec/Plan/graph, obtain approval, then reinitialize. Never weaken a pass condition to make a gate green.
 
 Stop and simplify when a Simple or Standard task starts creating a graph, task count determines agent count, Git actions lack authority, loops exceed their bound, or success relies only on an Agent assertion.
+
+## Examples
+
+Classify from evidence, not from prompt length or the label "Complex":
+
+```text
+Rename a local variable and run one focused test
+=> Simple: Implement -> focused Verify
+
+Add bounded validation behavior to one service
+=> Standard: Spec -> approval -> Plan -> approval -> TDD batches -> Verify
+
+Migrate persisted data while preserving a public API and rollback path
+=> Complex: approved Spec/Plan -> executable graph -> evidence gates
+```
+
+For a Complex graph on Windows, resolve both roots first, then validate and render with one available executor:
+
+```powershell
+$skillRoot = "C:\absolute\path\to\orchestrating-development-graphs"
+$targetRoot = "C:\absolute\path\to\target-repository"
+$graph = Join-Path $targetRoot "docs\superpowers\graphs\2026-07-29-migration.json"
+
+node (Join-Path $skillRoot "scripts\dev_graph.mjs") validate $graph
+node (Join-Path $skillRoot "scripts\dev_graph.mjs") render $graph
+```
+
+## Limitations
+
+- The executor validates and records orchestration state; it does not run tests, builds, migrations, deployments, or arbitrary task commands.
+- JSON is the source of truth; the SVG is a generated preview and cannot be used to update graph state.
+- Complex execution requires Python 3.10+ or Node.js 18+. Simple and Standard routing requires neither runtime.
+- Companion Skills improve node handling but are optional; host rules and explicit user instructions always take precedence.
+
+## References
+
+- **REQUIRED FOR GRAPH AUTHORING:** `<SKILL_ROOT>/references/graph-schema.md`
+- Optional companion Skills: `superpowers:brainstorming`, `superpowers:systematic-debugging`, `superpowers:writing-plans`, `superpowers:test-driven-development`, `bounded-plan-execution`, `superpowers:verification-before-completion`, and `superpowers:requesting-code-review`.
+- Distribution and installation guide: `README.md` and `README.zh-CN.md` in the repository root.
