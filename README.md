@@ -2,7 +2,7 @@
 
 [简体中文](README.zh-CN.md)
 
-A Codex skill that selects the smallest reliable development workflow and uses a persistent executable graph only when a change is genuinely complex.
+A Codex and Claude Code skill that selects the smallest reliable development workflow and uses a persistent executable graph only when a change is genuinely complex.
 
 This is not a wrapper that sends every task through the same heavyweight pipeline:
 
@@ -51,9 +51,11 @@ The orchestration skill routes node work to these companion skills when relevant
 - `superpowers:verification-before-completion`
 - `bounded-plan-execution`, when available
 
-Install those separately; they are referenced by name and are not vendored here.
+Install those separately if your host provides them. They are referenced by name and are not vendored here. If a companion skill is unavailable, the current agent applies the same discipline directly; only Python or Node.js is required for Complex graph execution.
 
 ## Installation
+
+### Codex
 
 Ask Codex to install this repository with `skill-installer`, or clone it directly.
 
@@ -72,6 +74,37 @@ git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git 
 ```
 
 Restart Codex or begin a new task after installation so the skill catalog is refreshed.
+
+### Claude Code
+
+Install it as a user skill on PowerShell:
+
+```powershell
+git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git `
+  "$env:USERPROFILE/.claude/skills/orchestrating-development-graphs"
+```
+
+On macOS/Linux:
+
+```bash
+git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git \
+  "$HOME/.claude/skills/orchestrating-development-graphs"
+```
+
+For project-only installation, clone or add the repository at `.claude/skills/orchestrating-development-graphs` inside that project. Start a new Claude Code session, then invoke `/orchestrating-development-graphs` or ask Claude to classify a development task with the skill.
+
+To make routing automatic for every development change, copy the relevant rule template into your repository root:
+
+- Codex: [`examples/AGENTS.md`](examples/AGENTS.md)
+- Claude Code: [`examples/CLAUDE.md`](examples/CLAUDE.md)
+
+## Claude Code compatibility
+
+- Claude Code reads the standard `SKILL.md`, `references/`, and `scripts/` content directly.
+- `agents/openai.yaml` is optional Codex display metadata; Claude Code can ignore it.
+- The named companion skills are optional. Install Superpowers or equivalent skills if desired; otherwise this Skill tells Claude to apply the same planning, debugging, TDD, and verification disciplines directly.
+- Python 3.10+ and Node.js 18+ commands are host-independent. No pip or npm packages are required.
+- Repository instructions belong in `CLAUDE.md` for Claude Code and `AGENTS.md` for Codex. The supplied examples keep their routing policy aligned.
 
 ## CLI
 
@@ -122,11 +155,14 @@ The suite covers static validation, state transitions, retry limits, re-approval
 ```text
 SKILL.md
 agents/openai.yaml
+examples/AGENTS.md
+examples/CLAUDE.md
 references/graph-schema.md
 scripts/dev_graph.py
 scripts/dev_graph.mjs
 tests/test_dev_graph.py
 tests/test_dev_graph.mjs
+tests/test_skill_contract.py
 ```
 
 ## License

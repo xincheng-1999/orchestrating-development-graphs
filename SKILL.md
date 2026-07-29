@@ -9,7 +9,7 @@ description: Use when starting a code change, feature, bug fix, refactor, or bui
 
 Choose the smallest reliable workflow. Use a persistent executable graph only when concrete risks make conditional gates, failure routes, and resumable state necessary.
 
-User instructions and the nearest applicable `AGENTS.md` override this Skill.
+User instructions and the nearest applicable host rule file—`AGENTS.md` in Codex or `CLAUDE.md` in Claude Code—override this Skill. Follow the host's normal rule-file discovery and precedence when both files are visible.
 
 ## Classify Before Acting
 
@@ -46,16 +46,26 @@ If the task changes the graph executor itself and no prior executor exists, the 
 
 ## Route Node Handlers
 
-- Material ambiguity: use `superpowers:brainstorming` before finalizing the Spec.
-- Defect or unexpected behavior: **REQUIRED SUB-SKILL:** use `superpowers:systematic-debugging` before proposing or implementing a fix.
-- Approved multi-step work: use `superpowers:writing-plans`; keep 3–5 steps and reject automatic commits, worktrees, or per-task agents.
-- Testable Standard/Complex behavior: **REQUIRED SUB-SKILL:** use `superpowers:test-driven-development`.
-- Approved Plan: **REQUIRED SUB-SKILL:** use `bounded-plan-execution` when available; the main Agent owns implementation and integration.
-- Completion claim: **REQUIRED SUB-SKILL:** use `superpowers:verification-before-completion`.
-- Independent review: use `superpowers:requesting-code-review` only for security, concurrency, permissions, migrations, or payments.
+When a named companion Skill is available in the current host, load it as required below. When it is unavailable, perform the stated discipline directly in the current Agent; a missing optional companion name is not a blocker.
+
+- Material ambiguity: use `superpowers:brainstorming` when available; otherwise clarify goals, constraints, alternatives, and acceptance before finalizing the Spec.
+- Defect or unexpected behavior: **REQUIRED WHEN AVAILABLE:** use `superpowers:systematic-debugging`; otherwise reproduce, gather evidence, isolate the root cause, then propose or implement a fix.
+- Approved multi-step work: use `superpowers:writing-plans` when available; otherwise write the 3–5 acceptance-mapped steps directly. Reject automatic commits, worktrees, or per-task agents.
+- Testable Standard/Complex behavior: **REQUIRED WHEN AVAILABLE:** use `superpowers:test-driven-development`; otherwise run the same RED -> GREEN -> REFACTOR cycle directly.
+- Approved Plan: use `bounded-plan-execution` when available; otherwise execute the approved steps sequentially in the main Agent and record fresh verification after each batch.
+- Completion claim: **REQUIRED WHEN AVAILABLE:** use `superpowers:verification-before-completion`; otherwise run fresh focused and integration verification before reporting success.
+- Independent review: use `superpowers:requesting-code-review` when available and only for security, concurrency, permissions, migrations, or payments.
 - Worktrees, commits, PRs, and branch finishing: use only when requested or repository-required.
 
 Never default to `superpowers:subagent-driven-development`; use it only when the user explicitly selects its per-task multi-agent pipeline.
+
+## Keep Host Compatibility
+
+The portable Skill consists of `SKILL.md`, `references/`, and `scripts/`. `agents/openai.yaml` supplies Codex display metadata only; Claude Code may ignore it without losing classification or graph execution.
+
+Claude Code discovers the Skill from a user or project `.claude/skills/orchestrating-development-graphs` directory and may invoke it as `/orchestrating-development-graphs` or through a matching natural-language request. Codex uses its configured Skill directory and `$orchestrating-development-graphs`.
+
+Only a runnable Python or Node.js executor is a hard dependency for Complex graph execution. Companion Skills improve the handling of individual nodes but are not required for the core classifier, state machine, evidence ledger, or SVG preview.
 
 ## Bound Delegation
 

@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-这是一个 Codex Skill：先判断开发任务的复杂度，再选择足够可靠且不过度的工作流。只有真正复杂的改动才创建持久化、可执行的开发图。
+这是一个同时适用于 Codex 和 Claude Code 的 Skill：先判断开发任务的复杂度，再选择足够可靠且不过度的工作流。只有真正复杂的改动才创建持久化、可执行的开发图。
 
 它不会把所有任务都塞进同一套重流程：
 
@@ -51,7 +51,11 @@ Skill 会按节点场景引用以下配套 Skill，仓库不会复制它们的�
 - `superpowers:verification-before-completion`
 - 可用时使用 `bounded-plan-execution`
 
+这些配套 Skill 可以单独安装。当前宿主没有某个配套 Skill 时，Agent 会直接执行同等的规划、调试、TDD 或验证纪律；只有 Complex 图执行所需的 Python 或 Node.js 是硬依赖。
+
 ## 安装
+
+### Codex
 
 可以让 Codex 使用 `skill-installer` 安装本仓库，也可以直接克隆。
 
@@ -70,6 +74,37 @@ git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git 
 ```
 
 安装后重启 Codex 或新建任务，让 Skill 列表重新加载。
+
+### Claude Code
+
+PowerShell 用户级安装：
+
+```powershell
+git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git `
+  "$env:USERPROFILE/.claude/skills/orchestrating-development-graphs"
+```
+
+macOS/Linux 用户级安装：
+
+```bash
+git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git \
+  "$HOME/.claude/skills/orchestrating-development-graphs"
+```
+
+如果只希望当前项目使用，可将仓库克隆或加入到项目内的 `.claude/skills/orchestrating-development-graphs`。新建 Claude Code 会话后，可以运行 `/orchestrating-development-graphs`，也可以直接要求 Claude“使用开发图 Skill 分类这个开发任务”。
+
+若希望每次开发改动都先经过分类，把对应模板复制到仓库根目录：
+
+- Codex：[`examples/AGENTS.md`](examples/AGENTS.md)
+- Claude Code：[`examples/CLAUDE.md`](examples/CLAUDE.md)
+
+## Claude Code 兼容说明
+
+- Claude Code 直接读取标准的 `SKILL.md`、`references/` 和 `scripts/`。
+- `agents/openai.yaml` 只是 Codex 展示元数据，Claude Code 忽略它不影响核心功能。
+- 配套 Skill 都是可选增强。可以安装 Superpowers 或同类 Skill；没有时，本 Skill 会要求 Claude 自己执行等价的规划、调试、TDD 和完成前验证。
+- Python 3.10+ 与 Node.js 18+ 命令不依赖宿主，也不需要安装 pip/npm 包。
+- Claude Code 的仓库规则写在 `CLAUDE.md`，Codex 的仓库规则写在 `AGENTS.md`；本仓库提供了保持一致的模板。
 
 ## 命令
 
