@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "id": "example-change",
+  "title": "Example complex change",
+  "spec": "../docs/superpowers/specs/example-change.md",
+  "plan": "../docs/superpowers/plans/example-change.md",
+  "entry": "implement",
+  "required_gates": [
+    "verify"
+  ],
+  "nodes": [
+    {
+      "id": "implement",
+      "title": "Implement",
+      "type": "action",
+      "owner": "main-agent",
+      "inputs": [
+        "approved-plan"
+      ],
+      "outputs": [
+        "implementation"
+      ],
+      "pass_condition": "focused tests pass",
+      "required": true
+    },
+    {
+      "id": "verify",
+      "title": "Verify",
+      "type": "gate",
+      "owner": "main-agent",
+      "inputs": [
+        "implementation"
+      ],
+      "outputs": [
+        "fresh verification evidence"
+      ],
+      "pass_condition": "focused and integration verification pass",
+      "required": true
+    },
+    {
+      "id": "rework",
+      "title": "Rework",
+      "type": "action",
+      "owner": "main-agent",
+      "inputs": [
+        "failure evidence"
+      ],
+      "outputs": [
+        "minimal correction"
+      ],
+      "pass_condition": "original gate can be rerun",
+      "required": false
+    },
+    {
+      "id": "approval",
+      "title": "Scope approval",
+      "type": "approval",
+      "owner": "user",
+      "inputs": [
+        "scope change"
+      ],
+      "outputs": [
+        "approval evidence"
+      ],
+      "pass_condition": "user approves revised artifacts",
+      "required": false
+    },
+    {
+      "id": "success",
+      "title": "Success",
+      "type": "terminal",
+      "owner": "main-agent",
+      "inputs": [
+        "required gates"
+      ],
+      "outputs": [
+        "completion"
+      ],
+      "pass_condition": "required gates passed",
+      "outcome": "success",
+      "required": true
+    },
+    {
+      "id": "stopped",
+      "title": "Stopped",
+      "type": "terminal",
+      "owner": "main-agent",
+      "inputs": [
+        "blocker"
+      ],
+      "outputs": [
+        "blocked report"
+      ],
+      "pass_condition": "blocker reported",
+      "outcome": "stopped",
+      "required": false
+    }
+  ],
+  "edges": [
+    {
+      "from": "implement",
+      "to": "verify",
+      "event": "pass"
+    },
+    {
+      "from": "implement",
+      "to": "rework",
+      "event": "fail",
+      "max_traversals": 2
+    },
+    {
+      "from": "implement",
+      "to": "approval",
+      "event": "scope_change"
+    },
+    {
+      "from": "implement",
+      "to": "stopped",
+      "event": "blocked"
+    },
+    {
+      "from": "verify",
+      "to": "success",
+      "event": "pass"
+    },
+    {
+      "from": "verify",
+      "to": "rework",
+      "event": "fail",
+      "max_traversals": 2
+    },
+    {
+      "from": "verify",
+      "to": "approval",
+      "event": "scope_change"
+    },
+    {
+      "from": "verify",
+      "to": "stopped",
+      "event": "blocked"
+    },
+    {
+      "from": "rework",
+      "to": "verify",
+      "event": "pass",
+      "max_traversals": 2
+    },
+    {
+      "from": "rework",
+      "to": "stopped",
+      "event": "fail"
+    },
+    {
+      "from": "rework",
+      "to": "approval",
+      "event": "scope_change"
+    },
+    {
+      "from": "rework",
+      "to": "stopped",
+      "event": "blocked"
+    },
+    {
+      "from": "approval",
+      "to": "implement",
+      "event": "pass",
+      "max_traversals": 1
+    },
+    {
+      "from": "approval",
+      "to": "stopped",
+      "event": "fail"
+    },
+    {
+      "from": "approval",
+      "to": "stopped",
+      "event": "blocked"
+    }
+  ]
+}

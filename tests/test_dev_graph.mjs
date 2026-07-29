@@ -21,6 +21,7 @@ import {
 
 const skillRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const scriptPath = path.join(skillRoot, 'scripts', 'dev_graph.mjs');
+const exampleGraphPath = path.join(skillRoot, 'examples', 'development-graph.json');
 
 function validGraph() {
   return {
@@ -61,6 +62,10 @@ function validGraph() {
 
 test('accepts a valid graph', () => {
   validateGraph(validGraph());
+});
+
+test('distribution example validates', () => {
+  validateGraph(JSON.parse(readFileSync(exampleGraphPath, 'utf8')));
 });
 
 test('rejects an edge that targets a missing node', () => {

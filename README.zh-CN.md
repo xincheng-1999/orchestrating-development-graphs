@@ -12,7 +12,7 @@
 | Standard | 范围明确的可观察行为变化 | `Spec -> Plan -> TDD batches -> Verify` |
 | Complex | 跨模块、持久化、迁移、并发、权限、安全、构建或依赖风险 | 已审批 Spec/Plan + 可执行 JSON Graph |
 
-## 为什么这是真正的 Graph Engineering
+## Graph Engineering：从流程图到可执行状态机
 
 Complex 路线中的 JSON 不是用来展示的静态流程图，而是持久化状态机：
 
@@ -33,65 +33,105 @@ flowchart LR
     B -->|范围变化| E
 ```
 
-## 环境要求
+## 依赖关系
 
-Complex 图执行至少需要一个运行时：
+| 组件 | 何时需要 | 用途 |
+| --- | --- | --- |
+| 本 Skill | 每个被路由的开发任务 | 分类与工作流规则 |
+| Python 3.10+ **或** Node.js 18+ | 仅 Complex 路线 | 执行持久化开发图并生成预览 |
+| Superpowers | 可选 | 提供 brainstorming、规划、TDD、调试和验证处理器 |
+| `bounded-plan-execution` | 可选 | 有限预算地执行已审批 Plan |
+| `AGENTS.md` / `CLAUDE.md` 模板 | 可选但推荐 | 确保其他开发流程之前先触发本 Skill |
 
-- 优先使用 Python 3.10+；
-- Python 不可用时回退 Node.js 18+。
+**Superpowers 不是前置依赖。** 当前宿主没有某个配套 Skill 时，Agent 会直接执行同等纪律。Simple 和 Standard 不探测 Python 或 Node.js；两个图执行器只使用标准库，不需要安装 pip/npm 包。
 
-Simple 和 Standard 不探测运行时。两个执行器都只使用标准库，没有 pip 或 npm 运行依赖。
-
-Skill 会按节点场景引用以下配套 Skill，仓库不会复制它们的源码：
-
-- `superpowers:brainstorming`
-- `superpowers:writing-plans`
-- `superpowers:test-driven-development`
-- `superpowers:systematic-debugging`
-- `superpowers:verification-before-completion`
-- 可用时使用 `bounded-plan-execution`
-
-这些配套 Skill 可以单独安装。当前宿主没有某个配套 Skill 时，Agent 会直接执行同等的规划、调试、TDD 或验证纪律；只有 Complex 图执行所需的 Python 或 Node.js 是硬依赖。
+如果希望启用可选集成，请参考 [Superpowers 官方安装说明](https://github.com/obra/superpowers#installation)。Claude Code 可执行 `/plugin install superpowers@claude-plugins-official`；Codex App 可在侧边栏 Plugins 中安装 Superpowers。
 
 ## 安装
 
+可以直接对 AI 说：`把这个仓库安装成当前宿主的 orchestrating-development-graphs Skill。目标已存在就用 pull --ff-only 更新，否则先创建父目录再 clone；最后运行文档中的 smoke test，并告诉我安装的绝对路径。`
+
 ### Codex
 
-可以让 Codex 使用 `skill-installer` 安装本仓库，也可以直接克隆。
+可以让 Codex 使用 `skill-installer` 安装，也可以执行下面的手动命令。目标目录已经存在时不要重复 `git clone`，应使用更新命令。
 
-PowerShell：
+PowerShell 首次安装：
 
 ```powershell
-git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git `
-  "$env:USERPROFILE\.codex\skills\orchestrating-development-graphs"
+$skillParent = Join-Path $env:USERPROFILE ".codex\skills"
+$skillRoot = Join-Path $skillParent "orchestrating-development-graphs"
+New-Item -ItemType Directory -Force -Path $skillParent | Out-Null
+git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git $skillRoot
 ```
 
-macOS/Linux：
+macOS/Linux 首次安装：
 
 ```bash
+mkdir -p "$HOME/.codex/skills"
 git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git \
   "$HOME/.codex/skills/orchestrating-development-graphs"
+```
+
+更新已有安装：
+
+```powershell
+git -C "$env:USERPROFILE/.codex/skills/orchestrating-development-graphs" pull --ff-only
+```
+
+```bash
+git -C "$HOME/.codex/skills/orchestrating-development-graphs" pull --ff-only
 ```
 
 安装后重启 Codex 或新建任务，让 Skill 列表重新加载。
 
 ### Claude Code
 
-PowerShell 用户级安装：
+PowerShell 首次用户级安装：
 
 ```powershell
-git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git `
-  "$env:USERPROFILE/.claude/skills/orchestrating-development-graphs"
+$skillParent = Join-Path $env:USERPROFILE ".claude\skills"
+$skillRoot = Join-Path $skillParent "orchestrating-development-graphs"
+New-Item -ItemType Directory -Force -Path $skillParent | Out-Null
+git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git $skillRoot
 ```
 
-macOS/Linux 用户级安装：
+macOS/Linux 首次用户级安装：
 
 ```bash
+mkdir -p "$HOME/.claude/skills"
 git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git \
   "$HOME/.claude/skills/orchestrating-development-graphs"
 ```
 
-如果只希望当前项目使用，可将仓库克隆或加入到项目内的 `.claude/skills/orchestrating-development-graphs`。新建 Claude Code 会话后，可以运行 `/orchestrating-development-graphs`，也可以直接要求 Claude“使用开发图 Skill 分类这个开发任务”。
+更新已有用户级安装：
+
+```powershell
+git -C "$env:USERPROFILE/.claude/skills/orchestrating-development-graphs" pull --ff-only
+```
+
+```bash
+git -C "$HOME/.claude/skills/orchestrating-development-graphs" pull --ff-only
+```
+
+如果团队需要随项目共享，在目标项目根目录添加 Git submodule。
+
+PowerShell：
+
+```powershell
+New-Item -ItemType Directory -Force -Path ".claude\skills" | Out-Null
+git submodule add https://github.com/xincheng-1999/orchestrating-development-graphs.git `
+  ".claude/skills/orchestrating-development-graphs"
+```
+
+macOS/Linux：
+
+```bash
+mkdir -p .claude/skills
+git submodule add https://github.com/xincheng-1999/orchestrating-development-graphs.git \
+  .claude/skills/orchestrating-development-graphs
+```
+
+新建 Claude Code 会话后，可以运行 `/orchestrating-development-graphs`，也可以直接要求 Claude“使用开发图 Skill 分类这个开发任务”。
 
 若希望每次开发改动都先经过分类，把对应模板复制到仓库根目录：
 
@@ -102,9 +142,20 @@ git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git 
 
 - Claude Code 直接读取标准的 `SKILL.md`、`references/` 和 `scripts/`。
 - `agents/openai.yaml` 只是 Codex 展示元数据，Claude Code 忽略它不影响核心功能。
-- 配套 Skill 都是可选增强。可以安装 Superpowers 或同类 Skill；没有时，本 Skill 会要求 Claude 自己执行等价的规划、调试、TDD 和完成前验证。
+- 配套 Skill 都是可选增强，Superpowers 不是前置依赖。需要时可以单独安装；没有时，本 Skill 会要求 Claude 自己执行等价的规划、调试、TDD 和完成前验证。
 - Python 3.10+ 与 Node.js 18+ 命令不依赖宿主，也不需要安装 pip/npm 包。
 - Claude Code 的仓库规则写在 `CLAUDE.md`，Codex 的仓库规则写在 `AGENTS.md`；本仓库提供了保持一致的模板。
+
+## 验证安装
+
+把实际安装目录解析成 `SKILL_ROOT` 后，可在任意工作目录运行以下任一 smoke test：
+
+```powershell
+python "<SKILL_ROOT>/scripts/dev_graph.py" validate "<SKILL_ROOT>/examples/development-graph.json"
+node "<SKILL_ROOT>/scripts/dev_graph.mjs" validate "<SKILL_ROOT>/examples/development-graph.json"
+```
+
+可用的运行时都应输出 `VALID: <path>`。然后新建宿主会话，让它使用 `orchestrating-development-graphs` 分类“修改 README 一处错别字”；预期结果是 Simple，路线为 `Implement -> focused Verify`。
 
 ## 命令
 
@@ -126,11 +177,11 @@ render <graph> [--output <preview.svg>]
 例如：
 
 ```powershell
-python scripts/dev_graph.py validate docs/superpowers/graphs/change.json
-python scripts/dev_graph.py render docs/superpowers/graphs/change.json
+python "<SKILL_ROOT>/scripts/dev_graph.py" validate "<TARGET_ROOT>/docs/superpowers/graphs/change.json"
+python "<SKILL_ROOT>/scripts/dev_graph.py" render "<TARGET_ROOT>/docs/superpowers/graphs/change.json"
 
-node scripts/dev_graph.mjs init docs/superpowers/graphs/change.json
-node scripts/dev_graph.mjs ready docs/superpowers/graphs/change.json
+node "<SKILL_ROOT>/scripts/dev_graph.mjs" init "<TARGET_ROOT>/docs/superpowers/graphs/change.json"
+node "<SKILL_ROOT>/scripts/dev_graph.mjs" ready "<TARGET_ROOT>/docs/superpowers/graphs/change.json"
 ```
 
 `render path/name.json` 默认生成 `path/name.svg`。`init/start/pass/fail/block/scope-change` 修改状态时也会自动刷新同名 SVG。

@@ -33,65 +33,105 @@ flowchart LR
     B -->|scope change| E
 ```
 
-## Requirements
+## Dependencies
 
-Complex graph execution needs one of:
+| Component | Required when | Purpose |
+| --- | --- | --- |
+| This Skill | Every routed development task | Classification and workflow rules |
+| Python 3.10+ **or** Node.js 18+ | Complex route only | Execute and preview the persistent graph |
+| Superpowers | Optional | Reusable brainstorming, planning, TDD, debugging, and verification handlers |
+| `bounded-plan-execution` | Optional | Bounded execution of an approved Plan |
+| `AGENTS.md` / `CLAUDE.md` template | Optional but recommended | Trigger this Skill before other development workflows |
 
-- Python 3.10 or newer, preferred when available; or
-- Node.js 18 or newer, used as the fallback.
+**Superpowers is not a prerequisite.** If a named companion skill is unavailable, the current agent performs the equivalent discipline directly. Simple and Standard tasks do not probe Python or Node.js. Both graph executors use only their standard libraries, with no pip or npm packages.
 
-Simple and Standard tasks do not probe either runtime. Both executors use only their standard libraries; there are no pip or npm runtime dependencies.
-
-The orchestration skill routes node work to these companion skills when relevant:
-
-- `superpowers:brainstorming`
-- `superpowers:writing-plans`
-- `superpowers:test-driven-development`
-- `superpowers:systematic-debugging`
-- `superpowers:verification-before-completion`
-- `bounded-plan-execution`, when available
-
-Install those separately if your host provides them. They are referenced by name and are not vendored here. If a companion skill is unavailable, the current agent applies the same discipline directly; only Python or Node.js is required for Complex graph execution.
+If you want the optional integration, follow the [official Superpowers installation guide](https://github.com/obra/superpowers#installation). In Claude Code, use `/plugin install superpowers@claude-plugins-official`; in the Codex app, install Superpowers from the Plugins sidebar.
 
 ## Installation
 
+Agent-ready request: `Install this repository as an orchestrating-development-graphs Skill for my current host. If the target exists, update it with pull --ff-only; otherwise create the parent directory and clone it. Run the documented smoke test and report the installed absolute path.`
+
 ### Codex
 
-Ask Codex to install this repository with `skill-installer`, or clone it directly.
+Ask Codex to install this repository with `skill-installer`, or use the manual commands below. Do not clone over an existing installation; use the update command instead.
 
-PowerShell:
+First installation on PowerShell:
 
 ```powershell
-git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git `
-  "$env:USERPROFILE\.codex\skills\orchestrating-development-graphs"
+$skillParent = Join-Path $env:USERPROFILE ".codex\skills"
+$skillRoot = Join-Path $skillParent "orchestrating-development-graphs"
+New-Item -ItemType Directory -Force -Path $skillParent | Out-Null
+git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git $skillRoot
 ```
 
-macOS/Linux:
+First installation on macOS/Linux:
 
 ```bash
+mkdir -p "$HOME/.codex/skills"
 git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git \
   "$HOME/.codex/skills/orchestrating-development-graphs"
+```
+
+Update an existing installation:
+
+```powershell
+git -C "$env:USERPROFILE/.codex/skills/orchestrating-development-graphs" pull --ff-only
+```
+
+```bash
+git -C "$HOME/.codex/skills/orchestrating-development-graphs" pull --ff-only
 ```
 
 Restart Codex or begin a new task after installation so the skill catalog is refreshed.
 
 ### Claude Code
 
-Install it as a user skill on PowerShell:
+First user installation on PowerShell:
 
 ```powershell
-git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git `
-  "$env:USERPROFILE/.claude/skills/orchestrating-development-graphs"
+$skillParent = Join-Path $env:USERPROFILE ".claude\skills"
+$skillRoot = Join-Path $skillParent "orchestrating-development-graphs"
+New-Item -ItemType Directory -Force -Path $skillParent | Out-Null
+git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git $skillRoot
 ```
 
-On macOS/Linux:
+First user installation on macOS/Linux:
 
 ```bash
+mkdir -p "$HOME/.claude/skills"
 git clone https://github.com/xincheng-1999/orchestrating-development-graphs.git \
   "$HOME/.claude/skills/orchestrating-development-graphs"
 ```
 
-For project-only installation, clone or add the repository at `.claude/skills/orchestrating-development-graphs` inside that project. Start a new Claude Code session, then invoke `/orchestrating-development-graphs` or ask Claude to classify a development task with the skill.
+Update an existing user installation:
+
+```powershell
+git -C "$env:USERPROFILE/.claude/skills/orchestrating-development-graphs" pull --ff-only
+```
+
+```bash
+git -C "$HOME/.claude/skills/orchestrating-development-graphs" pull --ff-only
+```
+
+For a team-shared project installation, add the Skill as a Git submodule from the project root.
+
+PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force -Path ".claude\skills" | Out-Null
+git submodule add https://github.com/xincheng-1999/orchestrating-development-graphs.git `
+  ".claude/skills/orchestrating-development-graphs"
+```
+
+macOS/Linux:
+
+```bash
+mkdir -p .claude/skills
+git submodule add https://github.com/xincheng-1999/orchestrating-development-graphs.git \
+  .claude/skills/orchestrating-development-graphs
+```
+
+Start a new Claude Code session, then invoke `/orchestrating-development-graphs` or ask Claude to classify a development task with the Skill.
 
 To make routing automatic for every development change, copy the relevant rule template into your repository root:
 
@@ -102,9 +142,20 @@ To make routing automatic for every development change, copy the relevant rule t
 
 - Claude Code reads the standard `SKILL.md`, `references/`, and `scripts/` content directly.
 - `agents/openai.yaml` is optional Codex display metadata; Claude Code can ignore it.
-- The named companion skills are optional. Install Superpowers or equivalent skills if desired; otherwise this Skill tells Claude to apply the same planning, debugging, TDD, and verification disciplines directly.
+- The named companion skills are optional. Superpowers is not a prerequisite; install it if desired, otherwise this Skill tells Claude to apply the same planning, debugging, TDD, and verification disciplines directly.
 - Python 3.10+ and Node.js 18+ commands are host-independent. No pip or npm packages are required.
 - Repository instructions belong in `CLAUDE.md` for Claude Code and `AGENTS.md` for Codex. The supplied examples keep their routing policy aligned.
+
+## Verify the installation
+
+Resolve the installed directory as `SKILL_ROOT`, then run either smoke test from any working directory:
+
+```powershell
+python "<SKILL_ROOT>/scripts/dev_graph.py" validate "<SKILL_ROOT>/examples/development-graph.json"
+node "<SKILL_ROOT>/scripts/dev_graph.mjs" validate "<SKILL_ROOT>/examples/development-graph.json"
+```
+
+Each available runtime must print `VALID: <path>`. Then start a new host session and ask it to use `orchestrating-development-graphs` to classify “fix one README typo”; the expected class is Simple with `Implement -> focused Verify`.
 
 ## CLI
 
@@ -126,11 +177,11 @@ render <graph> [--output <preview.svg>]
 Examples:
 
 ```powershell
-python scripts/dev_graph.py validate docs/superpowers/graphs/change.json
-python scripts/dev_graph.py render docs/superpowers/graphs/change.json
+python "<SKILL_ROOT>/scripts/dev_graph.py" validate "<TARGET_ROOT>/docs/superpowers/graphs/change.json"
+python "<SKILL_ROOT>/scripts/dev_graph.py" render "<TARGET_ROOT>/docs/superpowers/graphs/change.json"
 
-node scripts/dev_graph.mjs init docs/superpowers/graphs/change.json
-node scripts/dev_graph.mjs ready docs/superpowers/graphs/change.json
+node "<SKILL_ROOT>/scripts/dev_graph.mjs" init "<TARGET_ROOT>/docs/superpowers/graphs/change.json"
+node "<SKILL_ROOT>/scripts/dev_graph.mjs" ready "<TARGET_ROOT>/docs/superpowers/graphs/change.json"
 ```
 
 Without `--output`, `render path/name.json` creates `path/name.svg`. Mutating commands also refresh the same-name SVG automatically so the preview follows runtime state.
@@ -157,6 +208,7 @@ SKILL.md
 agents/openai.yaml
 examples/AGENTS.md
 examples/CLAUDE.md
+examples/development-graph.json
 references/graph-schema.md
 scripts/dev_graph.py
 scripts/dev_graph.mjs

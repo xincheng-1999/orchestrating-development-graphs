@@ -14,6 +14,7 @@ SCRIPT_PATH = SKILL_ROOT / "scripts" / "dev_graph.py"
 SKILL_PATH = SKILL_ROOT / "SKILL.md"
 REFERENCE_PATH = SKILL_ROOT / "references" / "graph-schema.md"
 NODE_SCRIPT_PATH = SKILL_ROOT / "scripts" / "dev_graph.mjs"
+EXAMPLE_GRAPH_PATH = SKILL_ROOT / "examples" / "development-graph.json"
 NODE_EXE = shutil.which("node")
 
 spec = importlib.util.spec_from_file_location("dev_graph", SCRIPT_PATH)
@@ -163,6 +164,10 @@ def extract_json_example(text, marker):
 class GraphValidationTests(unittest.TestCase):
     def test_accepts_valid_graph(self):
         validate_graph(valid_graph())
+
+    def test_distribution_example_validates(self):
+        example = json.loads(EXAMPLE_GRAPH_PATH.read_text(encoding="utf-8"))
+        validate_graph(example)
 
     def test_rejects_missing_edge_target(self):
         graph = valid_graph()

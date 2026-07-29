@@ -33,6 +33,33 @@ class ClaudeCodeCompatibilityContract(unittest.TestCase):
         self.assertIn("agents/openai.yaml", readme)
         self.assertIn("companion skills", readme.lower())
 
+    def test_dependency_contract_distinguishes_hard_and_optional_requirements(self):
+        english = (ROOT / "README.md").read_text(encoding="utf-8")
+        chinese = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+        self.assertIn("Superpowers", english)
+        self.assertIn("not a prerequisite", english)
+        self.assertIn("Superpowers", chinese)
+        self.assertIn("不是前置依赖", chinese)
+
+    def test_skill_resolves_executor_from_skill_root_not_target_repository(self):
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("SKILL_ROOT", skill)
+        self.assertIn("TARGET_ROOT", skill)
+        self.assertIn("directory containing this `SKILL.md`", skill)
+        self.assertIn("<SKILL_ROOT>/scripts/dev_graph.py", skill)
+        self.assertIn("<SKILL_ROOT>/scripts/dev_graph.mjs", skill)
+
+    def test_installation_docs_cover_fresh_install_update_project_and_smoke_test(self):
+        for name in ("README.md", "README.zh-CN.md"):
+            with self.subTest(name=name):
+                readme = (ROOT / name).read_text(encoding="utf-8")
+                self.assertIn("New-Item", readme)
+                self.assertIn("mkdir -p", readme)
+                self.assertIn("pull --ff-only", readme)
+                self.assertIn("git submodule add", readme)
+                self.assertIn("examples/development-graph.json", readme)
+                self.assertIn("VALID:", readme)
+
 
 if __name__ == "__main__":
     unittest.main()

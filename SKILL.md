@@ -23,18 +23,27 @@ Use the lowest class supported by evidence and report the class, concrete signal
 
 Simple tasks must not create a graph artifact. Do not create a Spec, Plan, worktree, commit, review pipeline, or subagent unless the user requests it or evidence forces reclassification. Implement and run the smallest fresh proof.
 
-Standard tasks must not create a graph artifact. Use the Git root, otherwise the current directory. Save mutually linked documents at `docs/superpowers/specs/YYYY-MM-DD-<topic>.md` and `docs/superpowers/plans/YYYY-MM-DD-<topic>.md`; obtain approval after each. Keep the Plan to 3–5 acceptance-mapped steps.
+Standard tasks must not create a graph artifact. Save mutually linked documents at `<TARGET_ROOT>/docs/superpowers/specs/YYYY-MM-DD-<topic>.md` and `<TARGET_ROOT>/docs/superpowers/plans/YYYY-MM-DD-<topic>.md`; obtain approval after each. Keep the Plan to 3–5 acceptance-mapped steps.
 
 Do not probe runtimes for Simple or Standard tasks. Runtime selection exists only to make a Complex execution graph executable.
 
+## Resolve Skill and Target Roots
+
+Before Standard or Complex work, resolve two distinct absolute directories:
+
+- `SKILL_ROOT`: the directory containing this `SKILL.md`. Resolve it from the loaded Skill resource, never from the current working directory. Read `references/`, run `scripts/`, and access distributed `examples/` only beneath this root.
+- `TARGET_ROOT`: the Git root of the repository being changed, otherwise the current directory. Write task Spec, Plan, graph JSON, runtime state, and SVG preview only beneath this root.
+
+Never assume the target repository contains this Skill's executor. Substitute the resolved absolute paths when a command below contains `<SKILL_ROOT>` or `<TARGET_ROOT>`.
+
 ## Execute Complex Work as a Graph
 
-For Complex work, use the Git root, otherwise the current directory.
+For Complex work, keep orchestration artifacts under `<TARGET_ROOT>` and invoke the executor from `<SKILL_ROOT>`.
 
-1. Write `docs/superpowers/specs/YYYY-MM-DD-<topic>.md` with current behavior, goals/non-goals, user behavior, interfaces/data flow, edge cases, risks, rollback, and acceptance criteria. Obtain approval.
-2. Write a 3–5 step Plan and `docs/superpowers/graphs/YYYY-MM-DD-<topic>.json`. Link Spec, Plan, and graph both ways. Obtain approval for the Plan and graph.
-3. **REQUIRED REFERENCE:** Read `references/graph-schema.md` before authoring or changing a graph.
-4. Select one executor for the task and keep using it: prefer an actually runnable Python 3.10+ with `scripts/dev_graph.py`; otherwise use Node.js 18+ with `scripts/dev_graph.mjs`. Treat a broken Windows Store Python alias as unavailable. If both runtimes are unavailable, record a blocker and stop; never replace the executable ledger with a prose-only graph.
+1. Write `<TARGET_ROOT>/docs/superpowers/specs/YYYY-MM-DD-<topic>.md` with current behavior, goals/non-goals, user behavior, interfaces/data flow, edge cases, risks, rollback, and acceptance criteria. Obtain approval.
+2. Write a 3–5 step Plan and `<TARGET_ROOT>/docs/superpowers/graphs/YYYY-MM-DD-<topic>.json`. Link Spec, Plan, and graph both ways. Obtain approval for the Plan and graph.
+3. **REQUIRED REFERENCE:** Read `<SKILL_ROOT>/references/graph-schema.md` before authoring or changing a graph.
+4. Select one executor for the task and keep using it: prefer an actually runnable Python 3.10+ with `python "<SKILL_ROOT>/scripts/dev_graph.py"`; otherwise use Node.js 18+ with `node "<SKILL_ROOT>/scripts/dev_graph.mjs"`. Treat a broken Windows Store Python alias as unavailable. If both runtimes are unavailable, record a blocker and stop; never replace the executable ledger with a prose-only graph.
 5. After authoring or changing a graph JSON definition, run `validate -> render` with the selected executor and confirm the same-name SVG exists before approval or execution. `init`, `start`, and outcome commands automatically refresh that SVG after state changes; JSON remains the source of truth.
 6. Run `init` against the approved graph, then ask `ready` which nodes may run. Use `start` before work and exactly one outcome command—`pass`, `fail`, `block`, or `scope-change`—after work, with fresh evidence.
 7. Follow only the node activated by the recorded edge. Do not manually rewrite runtime state, erase failed attempts, or continue down an inactive branch.
@@ -65,7 +74,7 @@ The portable Skill consists of `SKILL.md`, `references/`, and `scripts/`. `agent
 
 Claude Code discovers the Skill from a user or project `.claude/skills/orchestrating-development-graphs` directory and may invoke it as `/orchestrating-development-graphs` or through a matching natural-language request. Codex uses its configured Skill directory and `$orchestrating-development-graphs`.
 
-Only a runnable Python or Node.js executor is a hard dependency for Complex graph execution. Companion Skills improve the handling of individual nodes but are not required for the core classifier, state machine, evidence ledger, or SVG preview.
+Only a runnable Python or Node.js executor is a hard dependency for Complex graph execution. Superpowers and `bounded-plan-execution` are optional companion Skills, not prerequisites. They improve individual node handling when installed; the fallback rules above keep the core classifier, state machine, evidence ledger, and SVG preview usable without them.
 
 ## Bound Delegation
 
